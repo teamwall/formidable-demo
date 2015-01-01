@@ -7,7 +7,7 @@
                  [compojure "1.1.5"]
                  [crate "0.2.5"]
                  [environ "0.3.0"]
-                 [formidable "0.1.5"]
+                 [formidable "0.1.6"]
                  [hiccup "1.0.2"]
                  [org.clojure/clojure "1.5.1"]
                  [org.clojure/clojurescript "0.0-2138"]
