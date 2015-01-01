@@ -180,50 +180,57 @@
                    (keyword (:renderer params))
                    :bootstrap3-stacked)]
      (layout
-      {:rendered renderer}
+      {:renderer renderer}
       [:div.pull-right.well.well-small
        (f/render-form (assoc renderer-form :renderer renderer :values params))]
       (demo-header :cljs)
       [:div#cljs-container.pull-left {:style "width: 50%"}]
       [:div.pull-right {:style "width: 47%"}
        [:pre.prettyprint.lang-clj {:style "word-wrap: normal; white-space: pre; overflow: hidden; font-size: 12px; border: none; background: #f8f8f8; padding: 10px"}
-        "(def demo-form
-  {:fields [{:name :h1 :type :heading :text \"Section 1\"}
-            {:name :full-name}
-            {:name \"user[email]\" :type :email}
-            {:name :spam :type :checkbox :label \"Yes, please spam me.\"}
-            {:name :password :type :password}
-            {:name :password-confirm :type :password}
-            {:name :h2 :type :heading :text \"Section 2\"}
-            {:name :note :type :html
-             :html [:div.alert.alert-info \"Please make note of this note.\"]}
-            {:name :date :type :date-select}
-            {:name :time :type :time-select}
-            {:name :flavors :type :checkboxes
-             :options [\"Chocolate\" \"Vanilla\" \"Strawberry\" \"Mint\"]}
-            {:name :location :type :compound
-             :fields [{:name :city :placeholder \"City\" :class \"input-medium\"}
-                      {:name :state :type :us-state :placeholder \"Select a state\"}]}]
-   :validations [[:required [:full-name \"user[email]\" :password]]
-                 [:min-length 4 :password]
-                 [:equal [:password :password-confirm]]
-                 [:min-length 2 :flavors \"select two or more flavors\"]
-                 [:complete :location]})
+        "(defn- get-rendered-from-url []
+  (js* \"location.search.substring(1).split('=')[1]\"))
+
+(def demo-form
+  (let [now (js/Date.)]
+    {:values {:spam true
+                  :date now
+                  :time now}
+     :renderer (if (get-rendered-from-url)
+                   (keyword (get-rendered-from-url))
+                   :bootstrap3-stacked)
+     :fields [{:name :h1 :type :heading :text \"Section 1\"}
+              {:name :full-name}
+              {:name \"user[email]\" :type :email}
+              {:name :spam :type :checkbox :label \"Yes, please spam me.\"}
+              {:name :password :type :password}
+              {:name :password-confirm :type :password}
+              {:name :h2 :type :heading :text \"Section 2\"}
+              {:name :note :type :html
+               :html [:div.alert.alert-info \"Please make note of this note.\"]}
+              {:name :date :type :date-select}
+              {:name :time :type :time-select}
+              {:name :flavors :type :checkboxes
+               :options [\"Chocolate\" \"Vanilla\" \"Strawberry\" \"Mint\"]}
+              {:name :location :type :compound
+               :fields [{:name :city :placeholder \"City\" :class \"input-medium\"}
+                        {:name :state :type :us-state :placeholder \"Select a state\"}]}]
+     :validations [[:required [:full-name \"user[email]\" :password]]
+                   [:min-length 4 :password]
+                   [:equal [:password :password-confirm]]
+                   [:min-length 2 :flavors \"select two or more flavors\"]
+                   [:complete :location]]}))
 
 (defn render-demo-form []
-  (let [now (js/Date.)
-        defaults {:spam true
-                  :date now
-                  :time now}]
-    (f/render-form (assoc demo-form :values defaults))))
+  (f/render-form demo-form))
 
 (defn main []
   (when-let [container (sel1 \"#cljs-container\")]
-    (d/append! container (crate/html (render-demo-form)))
-    (fd/handle-submit
-      demo-form container
-      (fn [params]
-        (js/alert (pr-str params))))))"]])))
+    (d/append! container
+               (crate/html (render-demo-form)))
+    (fd/handle-submit demo-form
+                      container
+                      (fn [params]
+                        (js/alert (pr-str params))))))"]])))
 
 (defroutes routes
   (GET "/" [& params] (show-demo-form params))
